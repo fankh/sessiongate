@@ -70,4 +70,3 @@ than promising a release date.
 A production release requires all P0 controls, a qualified credential path,
 enforceable session termination, reliable audit export, backup restoration,
 documented capacity limits, and a complete real-browser/VM regression pass.
-
