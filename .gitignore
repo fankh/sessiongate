@@ -1,0 +1,3 @@
+/target/
+/.env
+/reports/integration-*.json

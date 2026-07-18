@@ -1,0 +1,118 @@
+services:
+  caddy:
+    image: caddy@sha256:ae4458638da8e1a91aafffb231c5f8778e964bca650c8a8cb23a7e8ac557aa3c
+    ports:
+      - 127.0.0.1:${CADDY_HTTPS_PORT:-18443}:8443
+    read_only: true
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [frontend]
+    depends_on:
+      portal:
+        condition: service_started
+      guacamole:
+        condition: service_started
+
+  portal:
+    build:
+      context: .
+      dockerfile: portal/Dockerfile
+    environment:
+      PORTAL_LISTEN: 0.0.0.0:8080
+      PORTAL_BEARER_TOKEN: ${PORTAL_BEARER_TOKEN:?set PORTAL_BEARER_TOKEN}
+      PORTAL_USER: ${PORTAL_USER:?set PORTAL_USER}
+      PORTAL_BOOTSTRAP_USERNAME: ${PORTAL_BOOTSTRAP_USERNAME:-}
+      PORTAL_BOOTSTRAP_PASSWORD: ${PORTAL_BOOTSTRAP_PASSWORD:-}
+      PORTAL_BOOTSTRAP_TOTP_HEX: ${PORTAL_BOOTSTRAP_TOTP_HEX:-}
+      PORTAL_ALLOWED_ORIGIN: ${PORTAL_ALLOWED_ORIGIN:-https://localhost:18443}
+      DATABASE_URL: postgres://${POSTGRES_USER:-vpn}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB:-vpn}
+      GUACAMOLE_JSON_SECRET_KEY: ${GUACAMOLE_JSON_SECRET_KEY:?set GUACAMOLE_JSON_SECRET_KEY}
+      GUACAMOLE_PUBLIC_URL: ${GUACAMOLE_PUBLIC_URL:-https://localhost:18443/guacamole/}
+      RDP_TARGET_HOST: ${RDP_TARGET_HOST:?set RDP_TARGET_HOST}
+      RDP_CERTIFICATE_SHA256: ${RDP_CERTIFICATE_SHA256:?set RDP_CERTIFICATE_SHA256}
+      RDP_DOMAIN: ${RDP_DOMAIN:-}
+    ports:
+      - 127.0.0.1:${PORTAL_HTTP_PORT:-18080}:8080
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,noexec,nosuid,nodev
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    networks: [frontend, database_control]
+    depends_on:
+      database:
+        condition: service_healthy
+      guacamole:
+        condition: service_started
+
+  database:
+    image: postgres@sha256:4f736ae292687621d4dbe0d499ffd024a36bd2ee7d8ca6f2ccd4c800f047b394
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-vpn}
+      POSTGRES_USER: ${POSTGRES_USER:-vpn}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - database:/var/lib/postgresql/data
+    networks: [database_control]
+
+  guacamole:
+    image: guacamole/guacamole@sha256:f344085e618bb05e22b964b0208dbd06d3468275bac70206f93805245e067b40
+    environment:
+      GUACD_HOSTNAME: guacd
+      GUACD_PORT: 4822
+      JSON_ENABLED: "true"
+      JSON_SECRET_KEY: ${GUACAMOLE_JSON_SECRET_KEY:?set GUACAMOLE_JSON_SECRET_KEY}
+    ports:
+      - 127.0.0.1:${GUACAMOLE_HTTP_PORT:-18081}:8080
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,noexec,nosuid,nodev
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    networks: [frontend, guacd_control]
+    depends_on:
+      guacd:
+        condition: service_started
+
+  guacd:
+    image: guacamole/guacd@sha256:8974eaa9ba32f713daf311e7cc8cd7e4cdfba1edea39eed75524e78ef4b08f4f
+    environment:
+      HOME: /tmp
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,noexec,nosuid,nodev
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - recordings:/recordings
+    networks: [guacd_control, rdp_egress]
+
+networks:
+  frontend:
+    internal: false
+  guacd_control:
+    internal: true
+  rdp_egress:
+    internal: false
+  database_control:
+    internal: true
+
+volumes:
+  recordings:
+  database:
+  caddy_data:
+  caddy_config:

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Remote desktop · SessionGate</title>
+  <link rel="stylesheet" href="/app.css">
+  <link rel="stylesheet" href="/rdp.css">
+</head>
+<body>
+  <div id="workspace">
+    <header id="toolbar" class="site-header">
+      <a class="brand" href="/"><span class="brand__mark">SG</span><span>SessionGate</span></a>
+      <div class="session-context"><strong>Remote session</strong><small id="session-state">Connecting securely…</small></div>
+      <nav aria-label="Remote desktop controls">
+      <a href="/">My desktops</a>
+      <button id="fullscreen" type="button">Full screen</button>
+      <a class="danger" href="/">End session</a>
+      </nav>
+    </header>
+    <iframe id="rdp" title="Remote Windows desktop" allow="clipboard-read; clipboard-write; fullscreen"></iframe>
+    <div id="notice" role="status"></div>
+  </div>
+  <script src="/rdp.js" defer></script>
+</body>
+</html>

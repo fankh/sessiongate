@@ -1,0 +1,40 @@
+{
+    admin off
+    auto_https disable_redirects
+}
+
+https://localhost:8443 {
+    tls internal
+    encode zstd gzip
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        Referrer-Policy "no-referrer"
+        Permissions-Policy "camera=(), geolocation=(), payment=(), usb=()"
+        X-Content-Type-Options "nosniff"
+        -Server
+    }
+
+    request_body {
+        max_size 1MB
+    }
+
+    handle /guacamole/* {
+        header {
+            Content-Security-Policy "frame-ancestors 'self'"
+            X-Frame-Options "SAMEORIGIN"
+        }
+        reverse_proxy guacamole:8080 {
+            header_down -X-Frame-Options
+            header_down -Content-Security-Policy
+        }
+    }
+
+    handle {
+        header {
+            Content-Security-Policy "default-src 'self'; connect-src 'self' wss://localhost:8443; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'"
+            X-Frame-Options "DENY"
+        }
+        reverse_proxy portal:8080
+    }
+}
