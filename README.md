@@ -2,15 +2,40 @@
 
 **Secure remote desktops, directly in your browser.**
 
-SessionGate is a self-hosted, open-source gateway for giving users controlled
-browser access to assigned Windows desktops. RDP remains private; users enter
-through an HTTPS portal where identity, target assignment, session policy, and
-audit controls are enforced centrally.
+SessionGate is a self-hosted, open-source gateway designed to give users
+production-grade, controlled browser access to assigned Windows desktops. RDP
+remains private; users enter through an HTTPS portal where identity, target
+assignment, session policy, and audit controls are enforced centrally.
 
-> SessionGate is under active development. The included Compose deployment is
-> suitable for local evaluation and integration testing. Review the
-> [production roadmap](ROADMAP.md) before operating it
-> on an internet-facing host.
+> **Release status: pre-production.** The implemented baseline is tested with
+> real containers, Microsoft Edge, and a Windows Hyper-V VM. Internet-facing
+> production use requires the release gates below. SessionGate is being built
+> toward those gates rather than treating the local Compose profile as a
+> production deployment.
+
+## Production-readiness target
+
+SessionGate's production target is a least-privilege remote-access service with
+a single public HTTPS entry point, private RDP destinations, credential
+isolation, enforceable session lifecycle, reliable audit delivery, tested
+recovery, and documented capacity limits.
+
+| Capability | Current state | Production gate |
+|---|---|---|
+| HTTPS edge and private service networks | Implemented | Public hostname and trusted certificate qualified |
+| Built-in identity, roles, and TOTP enforcement | Implemented baseline | Complete enrollment, recovery, lockout, and rotation flows |
+| Target assignment and default-deny policy | Implemented and tested | Full mutation authorization and regression coverage |
+| NLA and RDP certificate pinning | Implemented and VM-tested | Certificate lifecycle procedure approved |
+| Credential handling | Temporary credentials and write-only references | One external broker or vault qualified |
+| Session lifecycle | Launch and persistence implemented | Idle timeout, maximum duration, revoke, and disconnect enforced |
+| Audit and SIEM | Events and transactional outbox contract implemented | Delivery worker, retry, idempotency, and backlog alerts qualified |
+| Backup and reliability | Persistent PostgreSQL volume documented | Restore test, rollback procedure, and failure drills passed |
+| Scale | Functional and latency tests completed | Concurrent-user limits and resource envelopes published |
+| Release governance | Tests and security guidance present | CI, SBOM, signed release, license file, and security review complete |
+
+The authoritative work sequence and exit criteria are maintained in
+[ROADMAP.md](ROADMAP.md). A release is production-ready only after every stated
+exit gate has objective test evidence.
 
 ## Why SessionGate?
 
@@ -49,7 +74,7 @@ Apache Guacamole ──► guacd ──► approved Windows RDP target
 See [ARCHITECTURE.md](ARCHITECTURE.md) for trust boundaries and component
 details.
 
-## Quick start
+## Local evaluation
 
 ### Prerequisites
 
@@ -115,7 +140,29 @@ To stop the stack without deleting persistent data:
 docker compose down
 ```
 
-## Configuration
+## Production deployment
+
+The checked-in Compose profile deliberately publishes services on loopback and
+uses Caddy's internal certificate for `localhost`. Before deploying on a hosted
+server:
+
+1. Configure a public DNS name and publicly trusted HTTPS certificate.
+2. Publish only TCP 443; keep portal, Guacamole, guacd, PostgreSQL, and RDP
+   diagnostic/control ports private.
+3. Store independent secrets outside the repository and remove bootstrap
+   credentials after first use.
+4. Restrict guacd egress to explicitly approved Windows targets.
+5. Configure privileged-user TOTP and operational account recovery.
+6. Connect and monitor the transactional audit outbox with the operator's SIEM.
+7. Run backup restoration and the complete browser/VM regression procedure.
+8. Record capacity limits, incident procedures, and rollback approval.
+
+Follow the [container deployment guide](docs/CONTAINER-DEPLOYMENT.md) for the
+hosted Caddy configuration, persistence, backup, restore, upgrade, and rollback
+procedures. The guide is an operational starting point; the gates in
+[ROADMAP.md](ROADMAP.md) determine release approval.
+
+## Configuration reference
 
 | Variable | Required | Purpose |
 |---|---:|---|
