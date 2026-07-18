@@ -9,7 +9,7 @@ audit controls are enforced centrally.
 
 > SessionGate is under active development. The included Compose deployment is
 > suitable for local evaluation and integration testing. Review the
-> [production readiness plan](PRODUCTION-PRIORITY-PLAN.md) before operating it
+> [production roadmap](ROADMAP.md) before operating it
 > on an internet-facing host.
 
 ## Why SessionGate?
@@ -162,10 +162,8 @@ cargo clippy --workspace --all-targets -- -D warnings
 The integration guide covers containers, a real Edge browser, Hyper-V,
 certificate pinning, NLA, policy controls, audit evidence, and performance:
 
-- [Testing guide](TESTING-GUIDE.md)
-- [Latest post-fix integration report](TEST-REPORT-POST-FIX-2026-07-18.md)
-- [Fullscreen browser report](FULLSCREEN-TEST-REPORT-2026-07-18.md)
-- [Usable feature qualification](USABLE-FEATURE-REPORT-2026-07-18.md)
+- [Testing guide](docs/TESTING.md)
+- [Consolidated test results](docs/TEST-RESULTS.md)
 
 ## Documentation
 
@@ -174,24 +172,19 @@ certificate pinning, NLA, policy controls, audit evidence, and performance:
 - [Container deployment](docs/CONTAINER-DEPLOYMENT.md)
 - [Management API](docs/MANAGEMENT-API.md)
 - [SIEM integration](docs/SIEM-INTEGRATION.md)
-- [Production decisions](PRODUCTION-DECISIONS.md)
-- [Production priority plan](PRODUCTION-PRIORITY-PLAN.md)
+- [Security model](SECURITY.md)
+- [Product roadmap and readiness](ROADMAP.md)
 
 ### Design and implementation
 
 - [System architecture](ARCHITECTURE.md)
-- [Implementation status](IMPLEMENTATION-STATUS.md)
-- [Browser RDP implementation plan](WEB-RDP-IMPLEMENTATION-PLAN.md)
-- [Implementation roadmap](IMPLEMENTATION-PLAN.md)
-- [Windows client research](WINDOWS-CLIENT.md)
+- [Product roadmap and readiness](ROADMAP.md)
+- [Management API contract](docs/MANAGEMENT-API.md)
 
 ### Test evidence
 
-- [Testing guide](TESTING-GUIDE.md)
-- [Initial historical report](TEST-REPORT-2026-07-18.md)
-- [Post-fix report](TEST-REPORT-POST-FIX-2026-07-18.md)
-- [Fullscreen report](FULLSCREEN-TEST-REPORT-2026-07-18.md)
-- [Feature qualification report](USABLE-FEATURE-REPORT-2026-07-18.md)
+- [Testing guide](docs/TESTING.md)
+- [Consolidated test results](docs/TEST-RESULTS.md)
 
 ## Contributing
 
