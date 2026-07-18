@@ -30,8 +30,8 @@ Clone the repository, enter this directory, and create the untracked
 environment file:
 
 ```sh
-git clone https://github.com/fankh/new-research.git
-cd new-research/vpn-solution
+git clone https://github.com/fankh/sessiongate.git
+cd sessiongate
 cp .env.example .env
 ```
 
